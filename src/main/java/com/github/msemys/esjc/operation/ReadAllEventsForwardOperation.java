@@ -9,6 +9,9 @@ import com.github.msemys.esjc.proto.EventStoreClientMessages.ReadAllEventsComple
 import com.github.msemys.esjc.tcp.TcpCommand;
 import com.google.protobuf.MessageLite;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 
 import static com.github.msemys.esjc.util.Strings.defaultIfEmpty;
@@ -19,18 +22,21 @@ public class ReadAllEventsForwardOperation extends AbstractOperation<AllEventsSl
     private final int maxCount;
     private final boolean resolveLinkTos;
     private final boolean requireMaster;
+    private final Iterable<String> allowedEventTypes;
 
     public ReadAllEventsForwardOperation(CompletableFuture<AllEventsSlice> result,
                                          Position position,
                                          int maxCount,
                                          boolean resolveLinkTos,
                                          boolean requireMaster,
-                                         UserCredentials userCredentials) {
+                                         UserCredentials userCredentials,
+                                         Iterable<String> allowedEventTypes) {
         super(result, TcpCommand.ReadAllEventsForward, TcpCommand.ReadAllEventsForwardCompleted, userCredentials);
         this.position = position;
         this.maxCount = maxCount;
         this.resolveLinkTos = resolveLinkTos;
         this.requireMaster = requireMaster;
+        this.allowedEventTypes = allowedEventTypes == null ? Collections.emptyList() : allowedEventTypes;
     }
 
     @Override
@@ -41,6 +47,7 @@ public class ReadAllEventsForwardOperation extends AbstractOperation<AllEventsSl
                 .setMaxCount(maxCount)
                 .setResolveLinkTos(resolveLinkTos)
                 .setRequireMaster(requireMaster)
+                .addAllAllowedEventTypes(this.allowedEventTypes)
                 .build();
     }
 
