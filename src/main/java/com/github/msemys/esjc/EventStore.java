@@ -491,11 +491,18 @@ public interface EventStore {
      * {@link NotAuthenticatedException}, {@link AccessDeniedException} or {@link ServerErrorException}
      * on exceptional completion.
      */
+    default CompletableFuture<AllEventsSlice> readAllEventsForward(Position position,
+                                                           int maxCount,
+                                                           boolean resolveLinkTos,
+                                                           UserCredentials userCredentials) {
+        return readAllEventsForward(position, maxCount, resolveLinkTos, null, null);
+    }
+
     CompletableFuture<AllEventsSlice> readAllEventsForward(Position position,
                                                            int maxCount,
                                                            boolean resolveLinkTos,
-                                                           UserCredentials userCredentials);
-
+                                                           UserCredentials userCredentials,
+                                                           Iterable<String> allowedEventTypes);
     /**
      * Reads all events in the node backwards (e.g. end to beginning) asynchronously using default user credentials.
      *
