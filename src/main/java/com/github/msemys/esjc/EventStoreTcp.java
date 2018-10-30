@@ -422,7 +422,7 @@ public class EventStoreTcp implements EventStore {
         checkNotNull(settings, "settings is null");
 
         CatchUpSubscription subscription = new AllCatchUpSubscription(this,
-            position, settings.resolveLinkTos, listener, userCredentials, settings.readBatchSize, settings.maxLiveQueueSize, executor());
+            position, settings.resolveLinkTos, listener, userCredentials, settings.readBatchSize, settings.maxLiveQueueSize, settings.allowedEventTypes, executor());
 
         subscription.start();
 
