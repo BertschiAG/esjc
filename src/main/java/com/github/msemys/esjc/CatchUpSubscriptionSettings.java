@@ -30,10 +30,13 @@ public class CatchUpSubscriptionSettings {
      */
     public final int readBatchSize;
 
+    public final Iterable<String> allowedEventTypes;
+
     private CatchUpSubscriptionSettings(Builder builder) {
         maxLiveQueueSize = builder.maxLiveQueueSize;
         resolveLinkTos = builder.resolveLinkTos;
         readBatchSize = builder.readBatchSize;
+        allowedEventTypes = builder.allowedEventTypes;
     }
 
     @Override
@@ -62,6 +65,7 @@ public class CatchUpSubscriptionSettings {
         private Integer maxLiveQueueSize;
         private Boolean resolveLinkTos;
         private Integer readBatchSize;
+        private Iterable<String> allowedEventTypes;
 
         /**
          * Specifies the maximum number of events allowed to be cached when processing from live subscription (by default, 10000 events).
@@ -94,6 +98,11 @@ public class CatchUpSubscriptionSettings {
          */
         public Builder readBatchSize(int readBatchSize) {
             this.readBatchSize = readBatchSize;
+            return this;
+        }
+
+        public Builder allowedEventTypes(Iterable<String> allowedEventTypes) {
+            this.allowedEventTypes = allowedEventTypes;
             return this;
         }
 
