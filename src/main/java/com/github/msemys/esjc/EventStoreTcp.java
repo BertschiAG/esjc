@@ -276,7 +276,6 @@ public class EventStoreTcp implements EventStore {
         checkArgument(BATCH_SIZE_RANGE.contains(maxCount), "maxCount is out of range. Allowed range: %s.", BATCH_SIZE_RANGE.toString());
 
         CompletableFuture<AllEventsSlice> result = new CompletableFuture<>();
-        // MARK: this needs updating
         enqueue(new ReadAllEventsForwardOperation(result, position, maxCount, resolveLinkTos, settings.requireMaster, userCredentials, allowedEventTypes));
         return result;
     }
