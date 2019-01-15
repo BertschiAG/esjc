@@ -270,12 +270,11 @@ public class EventStoreTcp implements EventStore {
     public CompletableFuture<AllEventsSlice> readAllEventsForward(Position position,
                                                                   int maxCount,
                                                                   boolean resolveLinkTos,
-                                                                  UserCredentials userCredentials,
-                                                                  Iterable<String> allowedEventTypes) {
+                                                                  UserCredentials userCredentials) {
         checkArgument(BATCH_SIZE_RANGE.contains(maxCount), "maxCount is out of range. Allowed range: %s.", BATCH_SIZE_RANGE.toString());
 
         CompletableFuture<AllEventsSlice> result = new CompletableFuture<>();
-        enqueue(new ReadAllEventsForwardOperation(result, position, maxCount, resolveLinkTos, settings.requireMaster, userCredentials, allowedEventTypes));
+        enqueue(new ReadAllEventsForwardOperation(result, position, maxCount, resolveLinkTos, settings.requireMaster, userCredentials));
         return result;
     }
 
@@ -288,6 +287,22 @@ public class EventStoreTcp implements EventStore {
 
         CompletableFuture<AllEventsSlice> result = new CompletableFuture<>();
         enqueue(new ReadAllEventsBackwardOperation(result, position, maxCount, resolveLinkTos, settings.requireMaster, userCredentials));
+        return result;
+    }
+
+    @Override
+    public CompletableFuture<AllEventsFilteredSlice> readAllEventsForwardFiltered(
+        Position position,
+        int maxCount,
+        int maxSearchWindow,
+        boolean resolveLinkTos,
+        Iterable<String> allowedEventTypes,
+        UserCredentials userCredentials) {
+
+        checkArgument(BATCH_SIZE_RANGE.contains(maxCount), "maxCount is out of range. Allowed range: %s.", BATCH_SIZE_RANGE.toString());
+
+        CompletableFuture<AllEventsFilteredSlice> result = new CompletableFuture<>();
+        enqueue(new ReadAllEventsForwardFilteredOperation(result, position, maxCount, maxSearchWindow, resolveLinkTos, settings.requireMaster, userCredentials, allowedEventTypes));
         return result;
     }
 
@@ -420,8 +435,16 @@ public class EventStoreTcp implements EventStore {
         checkNotNull(listener, "listener is null");
         checkNotNull(settings, "settings is null");
 
-        CatchUpSubscription subscription = new AllCatchUpSubscription(this,
-            position, settings.resolveLinkTos, listener, userCredentials, settings.readBatchSize, settings.maxLiveQueueSize, settings.allowedEventTypes, executor());
+        CatchUpSubscription subscription;
+        if(settings.allowedEventTypes != null) {
+            int maxSearchWindow = settings.maxSearchWindow == null ? settings.readBatchSize : settings.maxSearchWindow;
+            subscription = new FilteredAllCatchUpSubscription(this, position, settings.resolveLinkTos,
+                listener, userCredentials, settings.readBatchSize, settings.maxLiveQueueSize, executor(),
+                maxSearchWindow, settings.allowedEventTypes);
+        } else {
+            subscription = new AllCatchUpSubscription(this,
+                position, settings.resolveLinkTos, listener, userCredentials, settings.readBatchSize, settings.maxLiveQueueSize, executor());
+        }
 
         subscription.start();
 
