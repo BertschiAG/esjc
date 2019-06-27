@@ -538,6 +538,7 @@ public interface EventStore {
      * @param maxCount       the maximum count of events to read, allowed range [1..4096].
      * @param maxSearchWindow the maximum number of events the server should consider for filling a batch of maxCount events
      * @param resolveLinkTos whether to resolve link events automatically.
+     * @param allowedEventTypes The event types to filter for. If null or empty, all events are returned.
      * @return a {@code CompletableFuture} representing the result of this operation. The future's methods
      * {@code get} and {@code join} can throw an exception with cause {@link CommandNotExpectedException},
      * {@link NotAuthenticatedException}, {@link AccessDeniedException} or {@link ServerErrorException}
@@ -559,6 +560,7 @@ public interface EventStore {
      * @param maxCount        the maximum count of events to read, allowed range [1..4096].
      * @param maxSearchWindow the maximum number of events the server should consider for filling a batch of maxCount events
      * @param resolveLinkTos  whether to resolve link events automatically.
+     * @param allowedEventTypes The event types to filter for. If null or empty, all events are returned.
      * @param userCredentials user credentials to be used for this operation (use {@code null} for default user credentials).
      * @return a {@code CompletableFuture} representing the result of this operation. The future's methods
      * {@code get} and {@code join} can throw an exception with cause {@link CommandNotExpectedException},
