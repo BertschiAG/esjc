@@ -491,18 +491,11 @@ public interface EventStore {
      * {@link NotAuthenticatedException}, {@link AccessDeniedException} or {@link ServerErrorException}
      * on exceptional completion.
      */
-    default CompletableFuture<AllEventsSlice> readAllEventsForward(Position position,
-                                                           int maxCount,
-                                                           boolean resolveLinkTos,
-                                                           UserCredentials userCredentials) {
-        return readAllEventsForward(position, maxCount, resolveLinkTos, null, null);
-    }
-
     CompletableFuture<AllEventsSlice> readAllEventsForward(Position position,
                                                            int maxCount,
                                                            boolean resolveLinkTos,
-                                                           UserCredentials userCredentials,
-                                                           Iterable<String> allowedEventTypes);
+                                                           UserCredentials userCredentials);
+
     /**
      * Reads all events in the node backwards (e.g. end to beginning) asynchronously using default user credentials.
      *
@@ -537,6 +530,49 @@ public interface EventStore {
                                                             int maxCount,
                                                             boolean resolveLinkTos,
                                                             UserCredentials userCredentials);
+
+    /**
+     * Reads all events in the node forward (e.g. beginning to end) asynchronously using default user credentials.
+     *
+     * @param position       the position (inclusive) to start reading from.
+     * @param maxCount       the maximum count of events to read, allowed range [1..4096].
+     * @param maxSearchWindow the maximum number of events the server should consider for filling a batch of maxCount events
+     * @param resolveLinkTos whether to resolve link events automatically.
+     * @param allowedEventTypes The event types to filter for. If null or empty, all events are returned.
+     * @return a {@code CompletableFuture} representing the result of this operation. The future's methods
+     * {@code get} and {@code join} can throw an exception with cause {@link CommandNotExpectedException},
+     * {@link NotAuthenticatedException}, {@link AccessDeniedException} or {@link ServerErrorException}
+     * on exceptional completion.
+     * @see #readAllEventsForwardFiltered(Position, int, int, boolean, Iterable, UserCredentials)
+     */
+    default CompletableFuture<AllEventsFilteredSlice> readAllEventsForwardFiltered(Position position,
+                                                                   int maxCount,
+                                                                   int maxSearchWindow,
+                                                                   boolean resolveLinkTos,
+                                                                   Iterable<String> allowedEventTypes) {
+        return readAllEventsForwardFiltered(position, maxCount, maxSearchWindow, resolveLinkTos, allowedEventTypes, null);
+    }
+
+    /**
+     * Reads all events in the node forward (e.g. beginning to end) asynchronously.
+     *
+     * @param position        the position (inclusive) to start reading from.
+     * @param maxCount        the maximum count of events to read, allowed range [1..4096].
+     * @param maxSearchWindow the maximum number of events the server should consider for filling a batch of maxCount events
+     * @param resolveLinkTos  whether to resolve link events automatically.
+     * @param allowedEventTypes The event types to filter for. If null or empty, all events are returned.
+     * @param userCredentials user credentials to be used for this operation (use {@code null} for default user credentials).
+     * @return a {@code CompletableFuture} representing the result of this operation. The future's methods
+     * {@code get} and {@code join} can throw an exception with cause {@link CommandNotExpectedException},
+     * {@link NotAuthenticatedException}, {@link AccessDeniedException} or {@link ServerErrorException}
+     * on exceptional completion.
+     */
+    CompletableFuture<AllEventsFilteredSlice> readAllEventsForwardFiltered(Position position,
+                                                           int maxCount,
+                                                           int maxSearchWindow,
+                                                           boolean resolveLinkTos,
+                                                           Iterable<String> allowedEventTypes,
+                                                           UserCredentials userCredentials);
 
     /**
      * Iterates over events in a stream from the specified start position to the end of stream using default user credentials.

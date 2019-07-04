@@ -10,7 +10,6 @@ import static com.github.msemys.esjc.util.Threads.sleepUninterruptibly;
 public class AllCatchUpSubscription extends CatchUpSubscription {
     private Position nextReadPosition;
     private Position lastProcessedPosition;
-    private final Iterable<String> allowedEventTypes;
 
     public AllCatchUpSubscription(EventStore eventstore,
                                   Position position,
@@ -19,23 +18,10 @@ public class AllCatchUpSubscription extends CatchUpSubscription {
                                   UserCredentials userCredentials,
                                   int readBatchSize,
                                   int maxPushQueueSize,
-                                  Executor executor) {
-        this(eventstore, position, resolveLinkTos, listener, userCredentials, readBatchSize, maxPushQueueSize, null, executor);
-    }
-
-    public AllCatchUpSubscription(EventStore eventstore,
-                                  Position position,
-                                  boolean resolveLinkTos,
-                                  CatchUpSubscriptionListener listener,
-                                  UserCredentials userCredentials,
-                                  int readBatchSize,
-                                  int maxPushQueueSize,
-                                  Iterable<String> allowedEventTypes,
                                   Executor executor) {
         super(eventstore, Strings.EMPTY, resolveLinkTos, listener, userCredentials, readBatchSize, maxPushQueueSize, executor);
         lastProcessedPosition = (position == null) ? Position.END : position;
         nextReadPosition = (position == null) ? Position.START : position;
-        this.allowedEventTypes = allowedEventTypes;
     }
 
     @Override
@@ -47,12 +33,7 @@ public class AllCatchUpSubscription extends CatchUpSubscription {
         boolean done;
 
         do {
-            AllEventsSlice slice = eventstore.readAllEventsForward(
-                nextReadPosition,
-                readBatchSize,
-                resolveLinkTos,
-                userCredentials,
-                this.allowedEventTypes).get();
+            AllEventsSlice slice = getNextSlice(eventstore, resolveLinkTos, nextReadPosition, userCredentials);
 
             for (ResolvedEvent e : slice.events) {
                 if (e.originalPosition == null) {
@@ -73,6 +54,20 @@ public class AllCatchUpSubscription extends CatchUpSubscription {
         } while (!done && !shouldStop);
 
         logger.trace("Catch-up subscription to {}: finished reading events, nextReadPosition = {}.", streamId(), nextReadPosition);
+    }
+
+    protected AllEventsSlice getNextSlice(
+        EventStore eventstore,
+        boolean resolveLinkTos,
+        Position nextReadPosition,
+        UserCredentials userCredentials)
+        throws InterruptedException, java.util.concurrent.ExecutionException {
+
+        return eventstore.readAllEventsForward(
+            nextReadPosition,
+            readBatchSize,
+            resolveLinkTos,
+            userCredentials).get();
     }
 
     @Override

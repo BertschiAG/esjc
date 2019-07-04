@@ -30,6 +30,17 @@ public class CatchUpSubscriptionSettings {
      */
     public final int readBatchSize;
 
+    /**
+     * The maximum number of events the server looks at during a readAllForward operation.
+     * Used for filtered reads to attempt to fill the window of readBatchSize number of events.
+     */
+    public final Integer maxSearchWindow;
+
+    /**
+     * The allowed event types. If this list is not-empty, each line will be interpreted as an event type that should
+     * be returned while catching up. An item can be a plain string that must match exactly on the event type, or a
+     * RegEx that is interpreted by the native .Net implementation on server side.
+     */
     public final Iterable<String> allowedEventTypes;
 
     private CatchUpSubscriptionSettings(Builder builder) {
@@ -37,6 +48,7 @@ public class CatchUpSubscriptionSettings {
         resolveLinkTos = builder.resolveLinkTos;
         readBatchSize = builder.readBatchSize;
         allowedEventTypes = builder.allowedEventTypes;
+        maxSearchWindow = builder.maxSearchWindow;
     }
 
     @Override
@@ -66,6 +78,7 @@ public class CatchUpSubscriptionSettings {
         private Boolean resolveLinkTos;
         private Integer readBatchSize;
         private Iterable<String> allowedEventTypes;
+        private Integer maxSearchWindow;
 
         /**
          * Specifies the maximum number of events allowed to be cached when processing from live subscription (by default, 10000 events).
@@ -103,6 +116,11 @@ public class CatchUpSubscriptionSettings {
 
         public Builder allowedEventTypes(Iterable<String> allowedEventTypes) {
             this.allowedEventTypes = allowedEventTypes;
+            return this;
+        }
+
+        public Builder maxSearchWindow(Integer maxSearchWindow) {
+            this.maxSearchWindow = maxSearchWindow;
             return this;
         }
 

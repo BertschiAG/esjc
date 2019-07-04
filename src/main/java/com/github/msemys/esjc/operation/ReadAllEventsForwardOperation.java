@@ -22,21 +22,18 @@ public class ReadAllEventsForwardOperation extends AbstractOperation<AllEventsSl
     private final int maxCount;
     private final boolean resolveLinkTos;
     private final boolean requireMaster;
-    private final Iterable<String> allowedEventTypes;
 
     public ReadAllEventsForwardOperation(CompletableFuture<AllEventsSlice> result,
                                          Position position,
                                          int maxCount,
                                          boolean resolveLinkTos,
                                          boolean requireMaster,
-                                         UserCredentials userCredentials,
-                                         Iterable<String> allowedEventTypes) {
+                                         UserCredentials userCredentials) {
         super(result, TcpCommand.ReadAllEventsForward, TcpCommand.ReadAllEventsForwardCompleted, userCredentials);
         this.position = position;
         this.maxCount = maxCount;
         this.resolveLinkTos = resolveLinkTos;
         this.requireMaster = requireMaster;
-        this.allowedEventTypes = allowedEventTypes == null ? Collections.emptyList() : allowedEventTypes;
     }
 
     @Override
@@ -47,7 +44,6 @@ public class ReadAllEventsForwardOperation extends AbstractOperation<AllEventsSl
                 .setMaxCount(maxCount)
                 .setResolveLinkTos(resolveLinkTos)
                 .setRequireMaster(requireMaster)
-                .addAllAllowedEventTypes(this.allowedEventTypes)
                 .build();
     }
 
